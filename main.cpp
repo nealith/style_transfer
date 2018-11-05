@@ -51,9 +51,9 @@ void compute_stats(const Mat & input ,Mat & hist, Mat & c_hist, Vec3d & mean, Ve
       sigma.val[1] += i_ptr_input[j].val[1] * i_ptr_input[j].val[1];
       sigma.val[2] += i_ptr_input[j].val[2] * i_ptr_input[j].val[2];
 
-      hist.ptr<Vec3i>(i_ptr_input[j].val[0])[0].val[0] += 1;
-      hist.ptr<Vec3i>(i_ptr_input[j].val[1])[0].val[1] += 1;
-      hist.ptr<Vec3i>(i_ptr_input[j].val[2])[0].val[2] += 1;
+      hist.ptr<Vec3i>(floor(i_ptr_input[j].val[0]))[0].val[0] += 1;
+      hist.ptr<Vec3i>(floor(i_ptr_input[j].val[1]))[0].val[1] += 1;
+      hist.ptr<Vec3i>(floor(i_ptr_input[j].val[2]))[0].val[2] += 1;
     }
 
   }
@@ -85,18 +85,6 @@ int main( int argc, char** argv )
     if( argc != 3 || !(input_=imread(argv[1], IMREAD_UNCHANGED)).data || !(style_=imread(argv[2], IMREAD_UNCHANGED)).data )
         return -1;
 
-        /*std::vector<cv::Mat> matChannels;
-        cv::split(input_, matChannels);
-
-        namedWindow( "lol", 1 );
-        imshow( "lol", matChannels[0] );
-
-        namedWindow( "lol2", 1 );
-        imshow( "lol2", matChannels[1] );
-
-        namedWindow( "lol3", 1 );
-        imshow( "lol3", matChannels[2] );*/
-
     if(input_.channels() < 4){
       createAlphaImage(input_,input);
     } else {
@@ -108,14 +96,6 @@ int main( int argc, char** argv )
     } else {
       style = style_;
     }
-
-    //namedWindow( "Input", 1 );
-    //imshow( "Input", input );
-    //namedWindow( "style", 1 );
-    //imshow( "style", style );
-    //waitKey();
-
-    output = Mat(input.rows,input.cols,CV_8UC4);
 
     Mat input_oRGB, style_oRGB, output_oRGB;
 
@@ -138,14 +118,14 @@ int main( int argc, char** argv )
       unsigned int i_min = 0;
       unsigned int i_max = 255;
       search_in_hist(c_histStyle,0,val_input,i_min,i_max);
-      hist_map.ptr<unsigned char>(i)[0] = (unsigned char) i_max;
+      hist_map.ptr<unsigned char>(i)[0] = (unsigned char) i_min;
     }
 
     for (unsigned int i = 0; i < input.rows; i++) {
       Vec4d * i_ptr_input = input_oRGB.ptr<Vec4d>(i);
       Vec4d * i_ptr_output = output_oRGB.ptr<Vec4d>(i);
       for (unsigned int j = 0; j < input.cols; j++) {
-        i_ptr_output[j].val[0] = hist_map.ptr<unsigned char>((int)i_ptr_input[j].val[0])[0];
+        i_ptr_output[j].val[0] = hist_map.ptr<unsigned char>(floor(i_ptr_input[j].val[0]))[0];
         i_ptr_output[j].val[1] = (i_ptr_input[j].val[1] - input_means.val[1])*(style_sigma.val[1]/input_sigma.val[1]) + style_means.val[1];
         i_ptr_output[j].val[2] = (i_ptr_input[j].val[2] - input_means.val[2])*(style_sigma.val[2]/input_sigma.val[2]) + style_means.val[2];
         i_ptr_output[j].val[3] = i_ptr_input[j].val[3];
@@ -157,12 +137,20 @@ int main( int argc, char** argv )
 
     convert_oRGB_to_BGR(output_oRGB,output);
 
-    std::cout << "test" << '\n';
-    //namedWindow( "output", 1 );
+    std::cout << "va te faire enculer" << '\n';
+
     //imshow( "output", output );
     //waitKey();
 
-    imwrite("output.png",output);
+    bool result = false;
+    try
+    {
+      result = imwrite("output.png",output);
+    }
+    catch (const cv::Exception& ex)
+    {
+      fprintf(stderr, "Exception converting image to PNG format: %s\n", ex.what());
+    }
 
     return 0;
 }

@@ -34,16 +34,18 @@ void convert_oRGB_to_BGR(const Mat & input, Mat & output)
       double C1 = cos(angle)*i_ptr_input[j].val[1] - sin(angle)*i_ptr_input[j].val[2];
       double C2 = sin(angle)*i_ptr_input[j].val[1] + cos(angle)*i_ptr_input[j].val[2];
 
-      int R = i_ptr_input[j].val[0] + 0.1140 * C1 + 0.7436 * C2;
-      int G = i_ptr_input[j].val[0] + 0.1140 * C1 - 0.4111 * C2;
-      int B = i_ptr_input[j].val[0] - 0.8660 * C1 + 0.1663 * C2;
+      double R = (double) i_ptr_input[j].val[0] + 0.1140 * C1 + 0.7436 * C2;
+      double G = (double) i_ptr_input[j].val[0] + 0.1140 * C1 - 0.4111 * C2;
+      double B = (double) i_ptr_input[j].val[0] - 0.8660 * C1 + 0.1663 * C2;
 
-
+      if(B > 255){ B = 255;}
+      if(G > 255){ G = 255;}
+      if(R > 255){ R = 255;}
 
       i_ptr_output[j].val[0] =  (unsigned char) B;
       i_ptr_output[j].val[1] =  (unsigned char) G;
       i_ptr_output[j].val[2] =  (unsigned char) R;
-      i_ptr_output[j].val[3] =  (unsigned char) i_ptr_input[j].val[3];
+      i_ptr_output[j].val[3] =  0;
     }
 
   }
@@ -59,9 +61,9 @@ void convert_BGR_to_oRGB(const Mat & input, Mat & output)
     const Vec4b * i_ptr_input = input.ptr<Vec4b>(i);
     Vec4d * i_ptr_output = output.ptr<Vec4d>(i);
     for (unsigned int j = 0; j < input.cols; j++) {
-      int L = 0.2990 * i_ptr_input[j].val[2] + 0.5870 * i_ptr_input[j].val[1] + 0.1140 * i_ptr_input[j].val[0];
-      double C1 = 0.5000 * i_ptr_input[j].val[2] + 0.5000 * i_ptr_input[j].val[1] - 1.0 * i_ptr_input[j].val[0];
-      double C2 = 0.8660 * i_ptr_input[j].val[2] - 0.8660 * i_ptr_input[j].val[1] + 0 * i_ptr_input[j].val[0];
+      double L = 0.2990 * (double)i_ptr_input[j].val[2] + 0.5870 * (double)i_ptr_input[j].val[1] + 0.1140 * (double)i_ptr_input[j].val[0];
+      double C1 = 0.5000 * (double)i_ptr_input[j].val[2] + 0.5000 * (double)i_ptr_input[j].val[1] - 1.0 * (double)i_ptr_input[j].val[0];
+      double C2 = 0.8660 * (double)i_ptr_input[j].val[2] - 0.8660 * (double)i_ptr_input[j].val[1] + 0 * (double)i_ptr_input[j].val[0];
 
       double teta = atan2(C2,C1);
 
@@ -75,8 +77,8 @@ void convert_BGR_to_oRGB(const Mat & input, Mat & output)
 
       double angle = teta0 - teta;
 
-      int Cyb = cos(angle)*C1 - sin(angle)*C2;
-      int Crg = sin(angle)*C1 + cos(angle)*C2;
+      double Cyb = cos(angle)*C1 - sin(angle)*C2;
+      double Crg = sin(angle)*C1 + cos(angle)*C2;
       i_ptr_output[j].val[0] = L;
       i_ptr_output[j].val[1] = Cyb;
       i_ptr_output[j].val[2] = Crg;

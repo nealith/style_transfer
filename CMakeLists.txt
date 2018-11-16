@@ -9,6 +9,8 @@ file(GLOB SOURCES
     ./src/*.cpp
 )
 
+add_compile_options("-g" "-O2")
+
 ADD_EXECUTABLE(style_transfert main.cpp ${SOURCES})
 
 target_link_libraries( style_transfert ${OpenCV_LIBS} )

@@ -192,7 +192,9 @@ int main( int argc, char** argv )
     output_oRGB = Mat(input.rows,input.cols,CV_64FC4);
 
     double max_1 = 0;
+    double min_1 = 1000;
     double max_2 = 0;
+    double min_2 = 1000;
 
     for (unsigned int i = 0; i < input_oRGB.rows; i++) {
       Vec4d * i_ptr_input = input_oRGB.ptr<Vec4d>(i);
@@ -202,18 +204,41 @@ int main( int argc, char** argv )
         i_ptr_output[j].val[1] = (i_ptr_input[j].val[1] - input_mean_c1)*(style_std_c1/input_std_c1) + style_mean_c1;
         if (max_1 < i_ptr_output[j].val[1]) {
           max_1 = i_ptr_output[j].val[1];
+        } else if (min_1 > i_ptr_output[j].val[1]) {
+          min_1 = i_ptr_output[j].val[1];
         }
         i_ptr_output[j].val[2] = (i_ptr_input[j].val[2] - input_mean_c2)*(style_std_c2/input_std_c2) + style_mean_c2;
         if (max_2 < i_ptr_output[j].val[2]) {
           max_2 = i_ptr_output[j].val[2];
+        } else if (min_2 > i_ptr_output[j].val[2]) {
+          min_2 = i_ptr_output[j].val[2];
         }
         i_ptr_output[j].val[3] = i_ptr_input[j].val[3];
       }
 
     }
 
-    if (max_1 > 1 || max_2 > 1) {
-      std::cout << "ooooooooooo" << '\n';
+    if(min_1 >= -1.0){
+      min_1 = -1.0;
+    }
+    if(min_2 >= -1.0){
+      min_2 = -1.0;
+    }
+
+    if(max_1 <= 1.0){
+      max_1 = 1.0;
+    }
+    if(max_2 <= 1.0){
+      max_2 = 1.0;
+    }
+
+    for (unsigned int i = 0; i < input_oRGB.rows; i++) {
+      Vec4d * i_ptr_input = input_oRGB.ptr<Vec4d>(i);
+      Vec4d * i_ptr_output = output_oRGB.ptr<Vec4d>(i);
+      for (unsigned int j = 0; j < input_oRGB.cols; j++) {
+        i_ptr_output[j].val[1] = ((i_ptr_output[j].val[1] - min_1) / (max_1-min_1)  )*2.0 - 1.0;
+        i_ptr_output[j].val[2] = ((i_ptr_output[j].val[2] - min_2) / (max_2-min_2)  )*2.0 - 1.0;
+      }
     }
 
     std::cout << "convert to RGBA..." << '\n';

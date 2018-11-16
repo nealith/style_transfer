@@ -20,6 +20,10 @@ void convert_oRGB_to_BGR(const Mat & input, Mat & output)
   double max1 = 0.0;
   double max2 = 0.0;
 
+  double min0 = 10000.0;
+  double min1 = 10000.0;
+  double min2 = 10000.0;
+
 
   for (unsigned int i = 0; i < input.rows; i++) {
     const Vec4d * i_ptr_input = input.ptr<Vec4d>(i);
@@ -44,17 +48,45 @@ void convert_oRGB_to_BGR(const Mat & input, Mat & output)
       i_ptr_output_tmp[j].val[2] = i_ptr_input[j].val[0] + 0.1140 * C1 + 0.7436 * C2;
       if (max2 < i_ptr_output_tmp[j].val[2]) {
         max2 = i_ptr_output_tmp[j].val[2];
+      } else if (i_ptr_output_tmp[j].val[2]  < min2) {
+        min2 = i_ptr_output_tmp[j].val[2];
       }
       i_ptr_output_tmp[j].val[1] = i_ptr_input[j].val[0] + 0.1140 * C1 - 0.4111 * C2;
       if (max1 < i_ptr_output_tmp[j].val[1]) {
         max1 = i_ptr_output_tmp[j].val[1];
+      } else if (i_ptr_output_tmp[j].val[1]  < min1) {
+        min1 = i_ptr_output_tmp[j].val[1];
       }
       i_ptr_output_tmp[j].val[0] = i_ptr_input[j].val[0] - 0.8660 * C1 + 0.1663 * C2;
       if (max0 < i_ptr_output_tmp[j].val[0]) {
         max0 = i_ptr_output_tmp[j].val[0];
+      } else if (i_ptr_output_tmp[j].val[0]  < min0) {
+        min0 = i_ptr_output_tmp[j].val[0];
       }
 
     }
+  }
+
+
+
+  if (min0 >= 0.0) {
+    min0 = 0.0;
+  }
+  if (min1 >= 0.0) {
+    min1 = 0.0;
+  }
+  if (min2 >= 0.0) {
+    min2 = 0.0;
+  }
+
+  if (max0 <= 1.0) {
+    max0 = 1.0;
+  }
+  if (max1 <= 1.0) {
+    max1 = 1.0;
+  }
+  if (max2 <= 1.0) {
+    max2 = 1.0;
   }
 
   for (unsigned int i = 0; i < input.rows; i++) {
@@ -63,9 +95,9 @@ void convert_oRGB_to_BGR(const Mat & input, Mat & output)
     Vec4b * i_ptr_output = output.ptr<Vec4b>(i);
     for (unsigned int j = 0; j < input.cols; j++) {
 
-      i_ptr_output[j].val[0] =  round((i_ptr_output_tmp[j].val[0]/max0)*255);
-      i_ptr_output[j].val[1] =  round((i_ptr_output_tmp[j].val[1]/max1)*255);
-      i_ptr_output[j].val[2] =  round((i_ptr_output_tmp[j].val[2]/max2)*255);
+      i_ptr_output[j].val[0] =  round(((i_ptr_output_tmp[j].val[0]-min0)/(max0-min0))*255);
+      i_ptr_output[j].val[1] =  round(((i_ptr_output_tmp[j].val[1]-min1)/(max1-min1))*255);
+      i_ptr_output[j].val[2] =  round(((i_ptr_output_tmp[j].val[2]-min2)/(max2-min2))*255);
       i_ptr_output[j].val[3] =  (unsigned char) i_ptr_input[j].val[3];
     }
 
@@ -77,6 +109,14 @@ void convert_oRGB_to_BGR(const Mat & input, Mat & output)
 void convert_BGR_to_oRGB(const Mat & input, Mat & output)
 {
   output = Mat(input.rows,input.cols,CV_64FC4);
+
+  double max0 = 0.0;
+  double max1 = 0.0;
+  double max2 = 0.0;
+
+  double min0 = 10000.0;
+  double min1 = 10000.0;
+  double min2 = 10000.0;
 
   for (unsigned int i = 0; i < input.rows; i++) {
     const Vec4b * i_ptr_input = input.ptr<Vec4b>(i);
@@ -100,10 +140,57 @@ void convert_BGR_to_oRGB(const Mat & input, Mat & output)
 
       double Cyb = cos(angle)*C1 - sin(angle)*C2;
       double Crg = sin(angle)*C1 + cos(angle)*C2;
-      i_ptr_output[j].val[0] = L;
-      i_ptr_output[j].val[1] = Cyb;
+
       i_ptr_output[j].val[2] = Crg;
+      if (max2 < i_ptr_output[j].val[2]) {
+        max2 = i_ptr_output[j].val[2];
+      } else if (i_ptr_output[j].val[2]  < min2) {
+        min2 = i_ptr_output[j].val[2];
+      }
+      i_ptr_output[j].val[1] = Cyb;
+      if (max1 < i_ptr_output[j].val[1]) {
+        max1 = i_ptr_output[j].val[1];
+      } else if (i_ptr_output[j].val[1]  < min1) {
+        min1 = i_ptr_output[j].val[1];
+      }
+      i_ptr_output[j].val[0] = L;
+      if (max0 < i_ptr_output[j].val[0]) {
+        max0 = i_ptr_output[j].val[0];
+      } else if (i_ptr_output[j].val[0]  < min0) {
+        min0 = i_ptr_output[j].val[0];
+      }
       i_ptr_output[j].val[3] = i_ptr_input[j].val[3];
+    }
+
+  }
+
+  if (min0 >= -1.0) {
+    min0 = -1.0;
+  }
+  if (min1 >= -1.0) {
+    min1 = -1.0;
+  }
+  if (min2 >= -1.0) {
+    min2 = -1.0;
+  }
+
+  if (max0 <= 1.0) {
+    max0 = 1.0;
+  }
+  if (max1 <= 1.0) {
+    max1 = 1.0;
+  }
+  if (max2 <= 1.0) {
+    max2 = 1.0;
+  }
+
+  for (unsigned int i = 0; i < input.rows; i++) {
+    Vec4d * i_ptr_output = output.ptr<Vec4d>(i);
+    for (unsigned int j = 0; j < input.cols; j++) {
+
+      i_ptr_output[j].val[0] = ((i_ptr_output[j].val[0]-min0) / (max0-min0)) * 2.0 - 1.0;
+      i_ptr_output[j].val[1] = ((i_ptr_output[j].val[1]-min1) / (max1-min1)) * 2.0 - 1.0; 
+      i_ptr_output[j].val[2] = ((i_ptr_output[j].val[2]-min2) / (max2-min2)) * 2.0 - 1.0;
     }
 
   }

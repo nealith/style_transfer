@@ -10,10 +10,10 @@ Unfortunaly, this method doens't work very well, sometimes it give really good r
 # exemple that is working 
 
 Input : 
-!(input)[https://raw.githubusercontent.com/nealith/style_transfer/dev/input.jpg]
+![input](https://raw.githubusercontent.com/nealith/style_transfer/dev/input.jpg)
 
 Style applied : 
-!(style)[https://raw.githubusercontent.com/nealith/style_transfer/dev/style.png]
+![style](https://raw.githubusercontent.com/nealith/style_transfer/dev/style.png)
 
 Output : 
-!(output)[https://raw.githubusercontent.com/nealith/style_transfer/dev/output.png]
+![output](https://raw.githubusercontent.com/nealith/style_transfer/dev/output.png)
